@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+$baseURL = 'http://localhost/ffbad/';
 
 /**
  * Search for player details :
@@ -202,10 +203,11 @@ function updatePlayersListOrder($newOrder = []) {
  * Export players in session to a CSV file
  * 
  * @param string $category s/d/m
- * @return string newly created CSV file
+ * @return string newly created CSV file name
  */
 function exportToCsvFile($category = 's') {
-    $filePath = __DIR__ . '/../data/export/' . $category . '-' . time() . '.csv';
+    $fileName = $category . '-' . time() . '.csv';
+    $filePath = __DIR__ . '/../data/export/' . $fileName;
     $f = fopen($filePath, 'w');
     fputcsv($f, [
         'license',
@@ -217,9 +219,10 @@ function exportToCsvFile($category = 's') {
         '',
         'Mx',
         ''
-    ]);
+            ], ';');
+    $i = 0;
     foreach ($_SESSION['players'] as $player) {
-        fputcsv($f, [
+        $row = [
             $player['license'],
             $player['name'],
             $player['age'],
@@ -228,9 +231,21 @@ function exportToCsvFile($category = 's') {
             $player['rankings']['d']['ranking'],
             $player['rankings']['d']['points'],
             $player['rankings']['m']['ranking'],
-            $player['rankings']['m']['points']
-        ]);
+            $player['rankings']['m']['points'],
+            ''
+        ];
+        if ($category == 's') {
+            $row[] = $player['rankings']['s']['points'];
+        } elseif ($i%2 == 0) {
+            $p1 = $player['rankings'][$category]['points'];
+        } elseif ($i%2 == 1) {
+            $p2 = $player['rankings'][$category]['points'];
+            $row[] = ($p1+$p2)/2;
+        }
+        fputcsv($f, array_map('utf8_decode', $row), ';');
+
+        $i++;
     }
     fclose($f);
-    return $filePath;
+    return $fileName;
 }
