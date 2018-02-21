@@ -105,8 +105,9 @@ function getRankingColor(ranking) {
  */
 function addPlayer() {
     var search = $("#search").val();
-    console.log("addPlayer : " + search);
-    $.ajax("ws/addPlayer.php?search=" + encodeURI(search))
+    var week = $("#week").val();
+    console.log("addPlayer : " + search + "/" + week);
+    $.ajax("ws/addPlayer.php?search=" + encodeURI(search) + "&week=" + encodeURI(week))
             .done(function (data) {
                 console.log("success adding players");
                 updatePlayersList();

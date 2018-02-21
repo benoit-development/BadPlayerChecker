@@ -8,8 +8,8 @@ require_once __DIR__ . '/../utils/utils.php';
 clog('Add Player');
 
 
-if (isset($_REQUEST['search'])) {
-    if (addPlayer($_REQUEST['search'])) {
+if (isset($_REQUEST['search']) && isset($_REQUEST['week'])) {
+    if (addPlayer($_REQUEST['search'], $_REQUEST['week'])) {
         clog('Player found');
         echo 'ok';
     } else {

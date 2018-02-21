@@ -88,18 +88,27 @@
             <div class="row">
 
                 <div class="col-lg-12 text-center">
-                    <h2 class="my-3">Add a player</h2>
+                    <h4 class="my-3">Add a player</h4>
                     <!-- Form to update config file -->
                     <div class="form-row">
-                        <div class="col-11">
+                        <div class="col-8">
                             <input type="text" class="form-control mb-2 mr-sm-2" id="search" placeholder="Name / License" name="search">
+                        </div>
+                        <div class="col-3">
+                            <select class="form-control" id="week" name="week">
+                                <?php
+                                foreach ($dateList as $week => $date) {
+                                    echo '<option value="' . $week . '">' . $date . '</option>';
+                                }
+                                ?>
+                            </select>
                         </div>
                         <div class="col-1">
                             <button type="submit" class="btn btn-primary mb-2 mr-sm-2" onclick="addPlayer();">Add</button>
                         </div>
                     </div>
 
-                    <h2 class="my-3">Players</h2>
+                    <h4 class="my-3">Players</h4>
                     <table class="table">
                         <thead>
                             <tr>

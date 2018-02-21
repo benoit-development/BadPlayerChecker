@@ -4,7 +4,7 @@ session_start();
 $baseURL = 'http://localhost/ffbad/';
 
 /**
- * Search for player details :
+ * Search for player details from poona & verybad to a certain week
  * <ul>
  * <li>license</li>
  * <li>name</li>
@@ -13,11 +13,93 @@ $baseURL = 'http://localhost/ffbad/';
  * </ul>
  * 
  * @param string $search player name or license
+ * @param string $week week number
+ */
+function getPlayerDetails($search, $week) {
+
+    clog("Searching : " . $search . "/" . $week);
+
+    // getting player informations from verybad
+    $verybad = getPlayerDetailsFromVerybad($search);
+    if ($verybad['status'] == 'ok') {
+        $poona = getPlayerDetailsFromPoona($verybad['license'], $week);
+        if ($poona['status'] == 'ok') {
+            return array_merge($poona, $verybad);
+        } else {
+            return $result['status'] = 'ko';
+        }
+    } else {
+        return $result['status'] = 'ko';
+    }
+}
+
+/**
+ * Search for player details from poona to a certain week
+ * <ul>
+ * <li>rankings : s/d/m : points/ranking</li>
+ * </ul>
+ * 
+ * @param string $license player license
+ * @param string $week week number
+ */
+function getPlayerDetailsFromPoona($license, $week) {
+
+    clog("Searching poona : " . $license . "/" . $week);
+
+    $url = "https://poona.ffbad.org/page.php?P=fo/menu/public/accueil/classement_hebdo";
+    $params = [
+        'Action' => 'consultation_joueur_rechercher',
+        'requestForm' => 'formRechercher',
+        'recherche_text_licence' => $license,
+        'recherche_select_classementHebdo' => $week
+    ];
+
+    $output = loadUrl($url, $params);
+
+    // rankings
+    $patternClassements = "/\sCote FFBaD : (.*) \((.*)\)/";
+    if (preg_match_all($patternClassements, $output, $matches)) {
+        // print_r($matches);
+
+        $result['rankings'] = [
+            's' => [
+                'points' => $matches[1][0],
+                'ranking' => $matches[2][0]
+            ],
+            'd' => [
+                'points' => $matches[1][1],
+                'ranking' => $matches[2][1]
+            ],
+            'm' => [
+                'points' => $matches[1][2],
+                'ranking' => $matches[2][2]
+            ]
+        ];
+
+        $result['status'] = 'ok';
+    } else {
+        $result['status'] = 'ko';
+    }
+
+    clog($result);
+
+    return $result;
+}
+
+/**
+ * Search for player details :
+ * <ul>
+ * <li>license</li>
+ * <li>name</li>
+ * <li>age</li>
+ * </ul>
+ * 
+ * @param string $search player name or license
  * @return array player details in array format
  */
 function getPlayerDetailsFromVerybad($search) {
 
-    clog("Searching : " . $search);
+    clog("Searching verybad : " . $search);
 
     if (is_numeric($search)) {
         // license number
@@ -55,19 +137,19 @@ function getPlayerDetailsFromVerybad($search) {
         preg_match($patternName, $output, $matches);
         $result['age'] = trim($matches[1]);
 
-        // classements
-        $patternName = "/<span class=\"label label-warning row-stat-badge\">(.*)<\/span>/";
-        preg_match_all($patternName, $output, $matches);
-        $result['rankings']['s']['ranking'] = $matches[1][0];
-        $result['rankings']['d']['ranking'] = $matches[1][1];
-        $result['rankings']['m']['ranking'] = $matches[1][2];
-
-        // points
-        $patternName = "/<h3 class=\"row-stat-value\">(.*)<\/h3>/";
-        preg_match_all($patternName, $output, $matches);
-        $result['rankings']['s']['points'] = $matches[1][0];
-        $result['rankings']['d']['points'] = $matches[1][1];
-        $result['rankings']['m']['points'] = $matches[1][2];
+//        // classements
+//        $patternName = "/<span class=\"label label-warning row-stat-badge\">(.*)<\/span>/";
+//        preg_match_all($patternName, $output, $matches);
+//        $result['rankings']['s']['ranking'] = $matches[1][0];
+//        $result['rankings']['d']['ranking'] = $matches[1][1];
+//        $result['rankings']['m']['ranking'] = $matches[1][2];
+//
+//        // points
+//        $patternName = "/<h3 class=\"row-stat-value\">(.*)<\/h3>/";
+//        preg_match_all($patternName, $output, $matches);
+//        $result['rankings']['s']['points'] = $matches[1][0];
+//        $result['rankings']['d']['points'] = $matches[1][1];
+//        $result['rankings']['m']['points'] = $matches[1][2];
 
 
         $result['status'] = 'ok';
@@ -132,11 +214,12 @@ function loadUrl($url, $params = []) {
  * If found, this method will search then add player details to the current session
  * 
  * @param string $search player license or name
+ * @param string $week week number
  */
-function addPlayer($search) {
-    clog('addPlayer requested : ' . $search);
+function addPlayer($search, $week) {
+    clog('addPlayer requested : ' . $search . '/' . $week);
 
-    $details = getPlayerDetailsFromVerybad($search);
+    $details = getPlayerDetails($search, $week);
     if ($details['status'] == 'ok') {
         $_SESSION['players'][$details['license']] = $details;
         return true;
@@ -236,11 +319,11 @@ function exportToCsvFile($category = 's') {
         ];
         if ($category == 's') {
             $row[] = $player['rankings']['s']['points'];
-        } elseif ($i%2 == 0) {
+        } elseif ($i % 2 == 0) {
             $p1 = $player['rankings'][$category]['points'];
-        } elseif ($i%2 == 1) {
+        } elseif ($i % 2 == 1) {
             $p2 = $player['rankings'][$category]['points'];
-            $row[] = ($p1+$p2)/2;
+            $row[] = ($p1 + $p2) / 2;
         }
         fputcsv($f, array_map('utf8_decode', $row), ';');
 
