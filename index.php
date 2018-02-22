@@ -21,6 +21,6 @@ while ($time <= time()) {
     $dateList[$i++] = date("d/m/Y", $time);
     $time = strtotime("+7 day", $time);
 }
-$dateList = array_reverse($dateList);
+$dateList = array_reverse($dateList, true);
 
 include './vue.php';

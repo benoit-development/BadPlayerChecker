@@ -24,13 +24,15 @@ function getPlayerDetails($search, $week) {
     if ($verybad['status'] == 'ok') {
         $poona = getPlayerDetailsFromPoona($verybad['license'], $week);
         if ($poona['status'] == 'ok') {
-            return array_merge($poona, $verybad);
+            $result = array_merge($poona, $verybad);
         } else {
-            return $result['status'] = 'ko';
+            $result['status'] = 'ko';
         }
     } else {
-        return $result['status'] = 'ko';
+        $result['status'] = 'ko';
     }
+    
+    return $result;
 }
 
 /**
@@ -132,10 +134,15 @@ function getPlayerDetailsFromVerybad($search) {
         preg_match($patternName, $output, $matches);
         $result['license'] = $matches[1];
 
-        // âge
+        // age
         $patternName = "/<h4 class=\"text-info\">.*\n(.*)\n.*<\/h4>/";
         preg_match($patternName, $output, $matches);
         $result['age'] = trim($matches[1]);
+        
+        // club
+        $patternName = "/<h4>(.*)<\/h4>/";
+        preg_match($patternName, $output, $matches);
+        $result['club'] = trim($matches[1]);
 
 //        // classements
 //        $patternName = "/<span class=\"label label-warning row-stat-badge\">(.*)<\/span>/";
@@ -220,6 +227,7 @@ function addPlayer($search, $week) {
     clog('addPlayer requested : ' . $search . '/' . $week);
 
     $details = getPlayerDetails($search, $week);
+    clog($details);
     if ($details['status'] == 'ok') {
         $_SESSION['players'][$details['license']] = $details;
         return true;

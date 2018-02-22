@@ -1,4 +1,5 @@
 
+
 /**
  * Update the table players list with the one from server
  * 
@@ -20,7 +21,9 @@ function updatePlayersList() {
             tbody.append(
                     '<tr id="' + encodeURI(id) + '">'
                     + '<td><a href="http://verybad.fr/joueur/detail/' + encodeURI(id) + '" target="_blank">' + htmlEntities(id) + '</a></td>'
-                    + '<td>' + htmlEntities(obj.name) + '</td>'
+                    + '<td>' + htmlEntities(obj.name)
+                    + '<br /><small class="font-weight-light">' + htmlEntities(obj.club) + '</small>'
+                    + '</td>'
                     + '<td>' + htmlEntities(obj.age) + '</td>'
                     + '<td>' + htmlEntities(obj.rankings.s.points)
                     + ' <span class="badge badge-dark" style="background:' + getRankingColor(obj.rankings.s.ranking) + ';">' + htmlEntities(obj.rankings.s.ranking)
@@ -106,14 +109,19 @@ function getRankingColor(ranking) {
 function addPlayer() {
     var search = $("#search").val();
     var week = $("#week").val();
+
     console.log("addPlayer : " + search + "/" + week);
+    toastInfo('Searching for ' + htmlEntities(search));
+
     $.ajax("ws/addPlayer.php?search=" + encodeURI(search) + "&week=" + encodeURI(week))
             .done(function (data) {
                 console.log("success adding players");
                 updatePlayersList();
+                toastSuccess('Player "' + htmlEntities(search) + '" found');
             })
             .fail(function (data) {
                 console.log("Failed adding player");
+                toastError('Player "' + htmlEntities(search) + '" not found');
             });
 }
 
@@ -127,9 +135,11 @@ function deletePlayer(id) {
             .done(function (data) {
                 console.log("success deleting player");
                 updatePlayersList();
+                toastSuccess('Player "' + htmlEntities(id) + '" deleted');
             })
             .fail(function (data) {
                 console.log("Failed deleting player");
+                toastError('Player "' + htmlEntities(id) + '" not deleted');
             });
 }
 
@@ -159,14 +169,66 @@ function updatePlayersOrder() {
 
     $.post(
             "ws/updateOrder.php",
-            {idList : order},
-            function() {
+            {idList: order},
+            function () {
                 console.log("Order success");
             }
     ).fail(function () {
         console.log("Failed order");
+        toastError('Failed changing order');
+        updatePlayersList();
     });
 }
 
 
+/**
+ * Display an information toast
+ * @param string text toast text
+ */
+function toastInfo(text) {
+    $.toast({
+        text: text,
+        icon: 'info'
+    });
+}
 
+/**
+ * Display a success toast
+ * @param string text toast text
+ */
+function toastSuccess(text) {
+    $.toast({
+        text: text,
+        icon: 'success'
+    });
+}
+
+/**
+ * Display an error toast
+ * @param string text toast text
+ */
+function toastError(text) {
+    $.toast({
+        text: text,
+        icon: 'error'
+    });
+}
+
+/**
+ * Reset players list
+ */
+function reset() {
+    console.log("Reset");
+
+    $.post(
+            "ws/reset.php",
+            function () {
+                console.log("Reset success");
+                toastSuccess('List reset');
+                updatePlayersList();
+            }
+    ).fail(function () {
+        console.log("Failed reset");
+        toastError('Failed resetting list');
+    });
+}

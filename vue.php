@@ -10,10 +10,14 @@
         <meta name="author" content="">
 
         <title>FFBAD Player Finder</title>
+        
+        <link rel="icon" href="images/ffbad.png" />
 
         <!-- Bootstrap core CSS -->
         <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
         <link href="vendor/jqueryui/jquery-ui.min.css" rel="stylesheet">
+        <link href="css/ffbad.css" rel="stylesheet">
+        <link href="css/toast.css" rel="stylesheet">
 
         <!-- Custom styles for this template -->
         <style>
@@ -56,6 +60,7 @@
 
         <!-- Scripts -->
         <script defer src="https://use.fontawesome.com/releases/v5.0.4/js/all.js"></script>
+        <script defer src="js/toast.js"></script>
 
     </head>
 
@@ -79,6 +84,8 @@
                     <a href="ws/exportPlayers.php?category=d" target="_blank" class="btn btn-success" role="button">Export Double</a>
                     &nbsp;
                     <a href="ws/exportPlayers.php?category=m" target="_blank" class="btn btn-success" role="button">Export Mixed</a>
+                    &nbsp;
+                    <a href="javascript:reset();" class="btn btn-danger" role="button">Reset</a>
                 </form>
             </div>
         </nav>
@@ -90,7 +97,7 @@
                 <div class="col-lg-12 text-center">
                     <h4 class="my-3">Add a player</h4>
                     <!-- Form to update config file -->
-                    <div class="form-row">
+                    <form class="form-row" action="javascript:addPlayer();">
                         <div class="col-8">
                             <input type="text" class="form-control mb-2 mr-sm-2" id="search" placeholder="Name / License" name="search">
                         </div>
@@ -104,9 +111,9 @@
                             </select>
                         </div>
                         <div class="col-1">
-                            <button type="submit" class="btn btn-primary mb-2 mr-sm-2" onclick="addPlayer();">Add</button>
+                            <button type="submit" class="btn btn-primary mb-2 mr-sm-2">Search</button>
                         </div>
-                    </div>
+                    </form>
 
                     <h4 class="my-3">Players</h4>
                     <table class="table">
@@ -137,19 +144,19 @@
         <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="vendor/jqueryui/jquery-ui.min.js"></script>
         <script type="text/javascript">
-                                $(document).ready(function () {
-                                    updatePlayersList();
-                                    $("#players").sortable({
-                                        placeholder: "ui-state-highlight",
-                                        axis: "y"
-                                    });
-                                    $("#players").disableSelection();
-                                    $("#players").sortable({
-                                        update: function (event, ui) {
-                                            updatePlayersOrder();
-                                        }
-                                    });
-                                });
+            $(document).ready(function () {
+                updatePlayersList();
+                $("#players").sortable({
+                    placeholder: "ui-state-highlight",
+                    axis: "y"
+                });
+                $("#players").disableSelection();
+                $("#players").sortable({
+                    update: function (event, ui) {
+                        updatePlayersOrder();
+                    }
+                });
+            });
         </script>
 
     </body>
