@@ -79,13 +79,13 @@
                     </li>
                 </ul>
                 <form class="form-inline my-2 my-lg-0">
-                    <a href="ws/exportPlayers.php?category=s" target="_blank" class="btn btn-success" role="button">Export Simple</a>
+                    <a href="ws/exportPlayers.php?category=s" target="_blank" class="btn btn-success btn-sm" role="button">Export Simple</a>
                     &nbsp;
-                    <a href="ws/exportPlayers.php?category=d" target="_blank" class="btn btn-success" role="button">Export Double</a>
+                    <a href="ws/exportPlayers.php?category=d" target="_blank" class="btn btn-success btn-sm" role="button">Export Double</a>
                     &nbsp;
-                    <a href="ws/exportPlayers.php?category=m" target="_blank" class="btn btn-success" role="button">Export Mixed</a>
+                    <a href="ws/exportPlayers.php?category=m" target="_blank" class="btn btn-success btn-sm" role="button">Export Mixed</a>
                     &nbsp;
-                    <a href="javascript:reset();" class="btn btn-danger" role="button">Reset</a>
+                    <a href="javascript:reset();" class="btn btn-danger btn-sm" role="button">Reset</a>
                 </form>
             </div>
         </nav>
