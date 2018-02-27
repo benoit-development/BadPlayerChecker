@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+
 $baseURL = 'http://localhost/ffbad/';
 
 /**
@@ -31,7 +32,7 @@ function getPlayerDetails($search, $week) {
     } else {
         $result['status'] = 'ko';
     }
-    
+
     return $result;
 }
 
@@ -117,7 +118,8 @@ function getPlayerDetailsFromVerybad($search) {
         ];
     } else {
         clog('ko');
-        return $result['status'] = 'ko';
+        $result['status'] = 'ko';
+        return $result;
     }
 
 
@@ -138,7 +140,7 @@ function getPlayerDetailsFromVerybad($search) {
         $patternName = "/<h4 class=\"text-info\">.*\n(.*)\n.*<\/h4>/";
         preg_match($patternName, $output, $matches);
         $result['age'] = trim($matches[1]);
-        
+
         // club
         $patternName = "/<h4>(.*)<\/h4>/";
         preg_match($patternName, $output, $matches);
@@ -178,6 +180,8 @@ function getPlayerDetailsFromVerybad($search) {
  */
 function loadUrl($url, $params = []) {
 
+    require __DIR__ . '/../conf/config.php';
+
     $ch = curl_init();
     curl_setopt_array($ch, array(
         CURLOPT_RETURNTRANSFER => true,
@@ -185,7 +189,6 @@ function loadUrl($url, $params = []) {
         CURLOPT_HEADER => true,
         // CURLOPT_NOBODY => true,
         CURLOPT_FRESH_CONNECT => true,
-        CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_HTTPHEADER => [
@@ -200,21 +203,27 @@ function loadUrl($url, $params = []) {
             'X-MicrosoftAjax: Delta=true',
         ],
         CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13',
-        CURLOPT_PROXYTYPE => 'HTTP',
-        CURLOPT_PROXYAUTH => true,
-        CURLOPT_PROXY => '138.21.89.90',
-        CURLOPT_PROXYPORT => 3128,
-        CURLOPT_PROXYUSERPWD => '',
         CURLOPT_POST => 'POST',
         CURLOPT_POSTFIELDS => http_build_query($params),
         CURLOPT_ENCODING => "gzip",
     ));
 
+    if (isset($proxyConf[CURLOPT_PROXYTYPE]) && ($proxyConf[CURLOPT_PROXYTYPE])) {
+        curl_setopt_array($ch, $proxyConf);
+    }
+
     $output = curl_exec($ch);
 
     curl_close($ch);
 
-    return $output;
+    // possible redirection in verybad
+    $patternName = "/<title>Redirecting to \/\joueur\/detail\/(.*)<\/title>/";
+    if (preg_match($patternName, $output, $matches)) {
+        $license = trim($matches[1]);
+        return loadUrl('http://verybad.fr/joueur/detail/' . $license);
+    } else {
+        return $output;
+    }
 }
 
 /**
